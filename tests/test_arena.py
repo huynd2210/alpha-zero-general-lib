@@ -1,7 +1,7 @@
 from alpha_zero_general import Arena
 from alpha_zero_general import RandomPlayer
 
-from example.othello.game import OthelloGame
+from games.othello.game import OthelloGame
 
 
 def test_arena():
