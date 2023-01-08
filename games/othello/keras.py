@@ -5,16 +5,16 @@ from alpha_zero_general import DotDict
 from alpha_zero_general import NeuralNet
 
 import tensorflow as tf
-from tensorflow.keras.layers import Activation
-from tensorflow.keras.layers import BatchNormalization
-from tensorflow.keras.layers import Conv2D
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.layers import Dropout
-from tensorflow.keras.layers import Flatten
-from tensorflow.keras.layers import Input
-from tensorflow.keras.layers import Reshape
-from tensorflow.keras.models import Model
-from tensorflow.keras.optimizers import Adam
+from keras.layers import Activation
+from keras.layers import BatchNormalization
+from keras.layers import Conv2D
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.layers import Flatten
+from keras.layers import Input
+from keras.layers import Reshape
+from keras.models import Model
+from keras.optimizers import Adam
 
 args = DotDict(
     {
@@ -31,12 +31,12 @@ args = DotDict(
 class KerasNetWrapper(NeuralNet):
     def __init__(self, game):
         self.args = args
-        self.model = self.get_model(
-            game.get_board_size(), game.get_action_size(), self.args,
+        self.model = self.getModel(
+            game.getBoardSize(), game.getActionSize(), self.args,
         )
 
     @staticmethod
-    def get_model(board_size, action_size, args):
+    def getModel(board_size, action_size, args):
         """
         Return compiled tensorflow.keras.models.Model.
         """
@@ -70,7 +70,7 @@ class KerasNetWrapper(NeuralNet):
         pi, v = self.model.predict(board)
         return pi[0], v[0]
 
-    def save_checkpoint(
+    def saveCheckpoint(
         self, folder="checkpoint", filename="checkpoint.pth.tar"
     ):
         filepath = os.path.join(folder, filename)
@@ -83,26 +83,26 @@ class KerasNetWrapper(NeuralNet):
             os.mkdir(folder)
         self.model.save_weights(filepath)
 
-    def load_checkpoint(
+    def loadCheckpoint(
         self, folder="checkpoint", filename="checkpoint.pth.tar"
     ):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
         filepath = os.path.join(folder, filename)
         self.model.load_weights(filepath)
 
-    def get_weights(self):
+    def getWeights(self):
         return self.model.get_weights()
 
-    def set_weights(self, weights):
+    def setWeights(self, weights):
         self.model.set_weights(weights)
 
-    def request_gpu(self):
+    def requestGPU(self):
         return self.args.cuda
 
 
 class OthelloNNet(KerasNetWrapper):
     @staticmethod
-    def get_model(board_size, action_size, args):
+    def getModel(board_size, action_size, args):
         # game params
         board_x, board_y = board_size
         action_size = action_size

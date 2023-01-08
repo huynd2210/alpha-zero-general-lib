@@ -45,7 +45,7 @@ class Board:
     def __getitem__(self, index):
         return self.pieces[index]
 
-    def count_diff(self, color):
+    def countDiff(self, color):
         """Counts the # pieces of the given color
         (1 for white, -1 for black, 0 for empty spaces)"""
         count = 0
@@ -57,7 +57,7 @@ class Board:
                     count -= 1
         return count
 
-    def get_legal_moves(self, color):
+    def getLegalMoves(self, color):
         """Returns all the legal moves for the given color.
         (1 for white, -1 for black
         """
@@ -67,20 +67,20 @@ class Board:
         for y in range(self.n):
             for x in range(self.n):
                 if self[x][y] == color:
-                    newmoves = self.get_moves_for_square((x, y))
+                    newmoves = self.getMovesForSquare((x, y))
                     moves.update(newmoves)
         return list(moves)
 
-    def has_legal_moves(self, color):
+    def hasLegalMoves(self, color):
         for y in range(self.n):
             for x in range(self.n):
                 if self[x][y] == color:
-                    newmoves = self.get_moves_for_square((x, y))
+                    newmoves = self.getMovesForSquare((x, y))
                     if len(newmoves) > 0:
                         return True
         return False
 
-    def get_moves_for_square(self, square):
+    def getMovesForSquare(self, square):
         """Returns all the legal moves that use the given square as a base.
         That is, if the given square is (3,4) and it contains a black piece,
         and (3,5) and (3,6) contain white pieces, and (3,7) is empty, one
@@ -99,7 +99,7 @@ class Board:
         # search all possible directions.
         moves = []
         for direction in self.__directions:
-            move = self._discover_move(square, direction)
+            move = self._discoverMove(square, direction)
             if move:
                 # print(square,move,direction)
                 moves.append(move)
@@ -107,7 +107,7 @@ class Board:
         # return the generated move list
         return moves
 
-    def execute_move(self, move, color):
+    def executeMove(self, move, color):
         """Perform the given move on the board; flips pieces as necessary.
         color gives the color pf the piece to play (1=white,-1=black)
         """
@@ -120,21 +120,21 @@ class Board:
         flips = [
             flip
             for direction in self.__directions
-            for flip in self._get_flips(move, direction, color)
+            for flip in self._getFlips(move, direction, color)
         ]
         assert len(list(flips)) > 0
         for x, y in flips:
             # print(self[x][y],color)
             self[x][y] = color
 
-    def _discover_move(self, origin, direction):
+    def _discoverMove(self, origin, direction):
         """ Returns the endpoint for a legal move, starting at the given origin,
         moving by the given increment."""
         x, y = origin
         color = self[x][y]
         flips = []
 
-        for x, y in Board._increment_move(origin, direction, self.n):
+        for x, y in Board._incrementMove(origin, direction, self.n):
             if self[x][y] == 0:
                 if flips:
                     # print("Found", x,y)
@@ -147,13 +147,13 @@ class Board:
                 # print("Flip",x,y)
                 flips.append((x, y))
 
-    def _get_flips(self, origin, direction, color):
+    def _getFlips(self, origin, direction, color):
         """ Gets the list of flips for a vertex and direction to use with the
-        execute_move function """
+        executeMove function """
         # initialize variables
         flips = [origin]
 
-        for x, y in Board._increment_move(origin, direction, self.n):
+        for x, y in Board._incrementMove(origin, direction, self.n):
             # print(x,y)
             if self[x][y] == 0:
                 return []
@@ -166,7 +166,7 @@ class Board:
         return []
 
     @staticmethod
-    def _increment_move(move, direction, n):
+    def _incrementMove(move, direction, n):
         # print(move)
         """ Generator expression for incrementing moves """
         move = list(map(sum, zip(move, direction)))

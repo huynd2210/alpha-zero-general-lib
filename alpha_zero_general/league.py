@@ -41,7 +41,7 @@ class League:
         self.history = []
         self._cache = LRUCache(cache_size)
 
-    def add_player(self, name, player, initial_rating=None):
+    def addPlayer(self, name, player, initial_rating=None):
         """
         Adds a player to the league.
 
@@ -53,7 +53,7 @@ class League:
         of the new player against all existing players for `self.rounds`, thus
         allowing incremental league competition.
         """
-        player_id = self._register_player(
+        player_id = self._registerPlayer(
             name, player, initial_rating=initial_rating
         )
 
@@ -80,7 +80,7 @@ class League:
         ]
         return sorted(ratings, reverse=True)
 
-    def _register_player(self, name, player, initial_rating=None):
+    def _registerPlayer(self, name, player, initial_rating=None):
         """Add a player """
         player_id = len(self.competitors) + 1
         elo = EloCompetitor(
@@ -89,7 +89,7 @@ class League:
         self.competitors[player_id] = name, player, elo
         return player_id
 
-    def _get_competitor(self, player_id):
+    def _getCompetitor(self, player_id):
         """
         Returns the name, the player instance and the elo object for the
         given player_id. If the player was to be lazyloaded by a function,
@@ -108,12 +108,12 @@ class League:
 
     def _match(self, a, b):
         """Play one match of player_id `a` vs `b`."""
-        name_a, player_a, elo_a = self._get_competitor(a)
-        name_b, player_b, elo_b = self._get_competitor(b)
+        name_a, player_a, elo_a = self._getCompetitor(a)
+        name_b, player_b, elo_b = self._getCompetitor(b)
         rating_a = elo_a.rating
         rating_b = elo_b.rating
         arena = Arena(player_a, player_b, self.game)
-        wins, losts, ties = arena.play_games(
+        wins, losts, ties = arena.playGames(
             self.games, verbose=False, quiet=True
         )
         print(name_a, name_b, wins, losts, ties)

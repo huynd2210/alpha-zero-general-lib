@@ -11,84 +11,84 @@ from games.othello.game import OthelloGame
 from games.othello.keras import OthelloNNet
 
 
-def test_alpha_zero_player():
+def testAlphaZeroPlayer():
     game = OthelloGame(6)
     player = AlphaZeroPlayer(game, OthelloNNet, num_mcts_sims=4)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_alpha_zero_player_from_checkpoint():
+def testAlphaZeroPlayerFromCheckpoint():
     game = OthelloGame(6)
 
     some_net = OthelloNNet(game)
     folder, filename = "/tmp/", "checkpoint_alpha_zero_player"
-    some_net.save_checkpoint(folder, filename)
+    some_net.saveCheckpoint(folder, filename)
     del some_net
 
     player = AlphaZeroPlayer(
         game, OthelloNNet, folder=folder, filename=filename, num_mcts_sims=4
     )
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_alpha_zero_player_from_model():
+def testAlphaZeroPlayerFromModel():
     game = OthelloGame(6)
     some_net = OthelloNNet(game)
     player = AlphaZeroPlayer(game, some_net)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_alpha_zero_player_reset():
+def testAlphaZeroPlayerReset():
     game = OthelloGame(6)
     player = AlphaZeroPlayer(game, OthelloNNet, num_mcts_sims=4)
     assert not player.mcts.Qsa
-    board = game.get_init_board()
+    board = game.getInitBoard()
     player.play(board)
     assert player.mcts.Qsa
     player.reset()
     assert not player.mcts.Qsa
 
 
-def test_bare_model_player():
+def testBareModelPlayer():
     game = OthelloGame(6)
     player = BareModelPlayer(game, OthelloNNet)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_bare_model_player_from_checkpoint():
+def testBareModelPlayerFromCheckpoint():
     game = OthelloGame(6)
 
     some_net = OthelloNNet(game)
     folder, filename = "/tmp/", "checkpoint_bare_model_player"
-    some_net.save_checkpoint(folder, filename)
+    some_net.saveCheckpoint(folder, filename)
     del some_net
 
     player = BareModelPlayer(
         game, OthelloNNet, folder=folder, filename=filename
     )
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_bare_model_player_from_model():
+def testBareModelPlayerFromModel():
     game = OthelloGame(6)
     some_net = OthelloNNet(game)
     player = BareModelPlayer(game, some_net)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_bare_model_player_invalid_nnet_parameter():
+def testBareModelPlayerInvallidNNetParameter():
     neither_nnet_nor_nnet_class = "something_else"
     game = OthelloGame(6)
     with pytest.raises(TypeError) as excinfo:
@@ -96,50 +96,50 @@ def test_bare_model_player_invalid_nnet_parameter():
     assert "NeuralNet subclass or instance" in str(excinfo.value)
 
 
-def test_greedy_player():
+def testGreedyPlayer():
     game = OthelloGame(6)
     player = GreedyPlayer(game)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_random_player():
+def testRandomPlayer():
     game = OthelloGame(6)
     player = RandomPlayer(game)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     action = player.play(board)
     assert action
 
 
-def test_human_player_valid_action():
+def testHumanPlayerValidAction():
     action_valid = "1,2"
     game = OthelloGame(6)
     player = HumanPlayer(game)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     with patch("builtins.input", side_effect=[action_valid]):
         action = player.play(board)
     assert action == 8
 
 
-def test_human_player_unknown_action(capsys):
+def testHumanPlayerUnknownAction(capsys):
     action_valid = "1,2"
     action_unknown = "x,x"
     game = OthelloGame(6)
     player = HumanPlayer(game)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     with patch("builtins.input", side_effect=[action_unknown, action_valid]):
         player.play(board)
     out, _err = capsys.readouterr()
     assert out == "Unknown action.\n"
 
 
-def test_human_player_invalid_action(capsys):
+def testHumanPlayerInvalidAction(capsys):
     action_valid = "1,2"
     action_invalid = "0,0"
     game = OthelloGame(6)
     player = HumanPlayer(game)
-    board = game.get_init_board()
+    board = game.getInitBoard()
     with patch("builtins.input", side_effect=[action_invalid, action_valid]):
         player.play(board)
     out, _err = capsys.readouterr()

@@ -19,18 +19,18 @@ greedy = GreedyPlayer(game)
 
 league = League(game, cache_size=3)
 league.start()
-league.add_player("random", random)
-league.add_player("greedy", greedy)
+league.addPlayer("random", random)
+league.addPlayer("greedy", greedy)
 # league.add_player("bare", bare)
 # league.add_player("alpha", alpha)
 
 
-def alpha_zero_at_checkpoint(i):
+def alphaZeroAtCheckpoint(i):
     return AlphaZeroPlayer(game, OthelloNNet, "./runs/1", f"model_{i:05d}")
 
 
 for i in [10, 20, 50, 100, 150, 200]:
-    league.add_player(f"alpha-{i}", partial(alpha_zero_at_checkpoint, i))
+    league.addPlayer(f"alpha-{i}", partial(alphaZeroAtCheckpoint, i))
 
 print(league.ratings())
 print(league.history)

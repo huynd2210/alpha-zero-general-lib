@@ -47,32 +47,32 @@ class NeuralNet(ABC):
         """
 
     @abstractmethod
-    def save_checkpoint(self, folder, filename):
+    def saveCheckpoint(self, folder, filename):
         """
         Saves the current neural network (with its parameters) in
         folder/filename
         """
 
     @abstractmethod
-    def load_checkpoint(self, folder, filename):
+    def loadCheckpoint(self, folder, filename):
         """
         Loads parameters of the neural network from folder/filename
         """
 
     @abstractmethod
-    def get_weights(self):
+    def getWeights(self):
         """
         Returns the weights of the neural network.
         """
 
     @abstractmethod
-    def set_weights(self, weights):
+    def setWeights(self, weights):
         """
         Sets the given weights to the neural network.
         """
 
     @abstractmethod
-    def request_gpu(self):
+    def requestGPU(self):
         """
         Returns True if a gpu should be used, otherwise False.
         """

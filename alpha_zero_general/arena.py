@@ -22,7 +22,7 @@ class Arena:
         self.game = game
         self.display = display
 
-    def play_game(self, verbose=False):
+    def playGame(self, verbose=False):
         """
         Executes one episode of a game.
 
@@ -32,12 +32,12 @@ class Arena:
             or
                 draw result returned from the game that is neither 1, -1, nor 0.
         """
-        self.reset_players()
+        self.resetPlayers()
         players = [self.player2, None, self.player1]
         current_player = 1
-        board = self.game.get_init_board()
+        board = self.game.getInitBoard()
         it = 0
-        while self.game.get_game_ended(board, current_player) == 0:
+        while self.game.getGameEnded(board, current_player) == 0:
             it += 1
             if verbose:
                 assert self.display
@@ -45,17 +45,17 @@ class Arena:
                 self.display(board)
 
             action = players[current_player + 1].play(
-                self.game.get_canonical_form(board, current_player)
+                self.game.getCanonicalForm(board, current_player)
             )
 
-            valids = self.game.get_valid_moves(
-                self.game.get_canonical_form(board, current_player), 1
+            valids = self.game.getValidMoves(
+                self.game.getCanonicalForm(board, current_player), 1
             )
 
             if valids[action] == 0:
                 print(action)
                 assert valids[action] > 0
-            board, current_player = self.game.get_next_state(
+            board, current_player = self.game.getNextState(
                 board, current_player, action
             )
         if verbose:
@@ -64,12 +64,12 @@ class Arena:
                 "Game over: Turn ",
                 str(it),
                 "Result ",
-                str(self.game.get_game_ended(board, 1)),
+                str(self.game.getGameEnded(board, 1)),
             )
             self.display(board)
-        return current_player * self.game.get_game_ended(board, current_player)
+        return current_player * self.game.getGameEnded(board, current_player)
 
-    def play_games(self, num, verbose=False, quiet=False):
+    def playGames(self, num, verbose=False, quiet=False):
         """
         Plays num games in which player1 starts num/2 games and player2 starts
         num/2 games.
@@ -87,7 +87,7 @@ class Arena:
         for _ in tqdm(
             range(num), desc="Arena.play_games (Player 1)", disable=quiet
         ):
-            game_result = self.play_game(verbose=verbose)
+            game_result = self.playGame(verbose=verbose)
             if game_result == 1:
                 one_won += 1
             elif game_result == -1:
@@ -100,7 +100,7 @@ class Arena:
         for _ in tqdm(
             range(num), desc="Arena.play_games (Player 2)", disable=quiet
         ):
-            game_result = self.play_game(verbose=verbose)
+            game_result = self.playGame(verbose=verbose)
             if game_result == -1:
                 one_won += 1
             elif game_result == 1:
@@ -110,7 +110,7 @@ class Arena:
 
         return one_won, two_won, draws
 
-    def reset_players(self):
+    def resetPlayers(self):
         """Reset the players."""
         self.player1.reset()
         self.player1.reset()

@@ -14,7 +14,7 @@ class Game(ABC):
     """
 
     @abstractmethod
-    def get_init_board(self):
+    def getInitBoard(self):
         """
         Returns:
             startBoard: a representation of the board (ideally this is the form
@@ -22,35 +22,35 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def get_board_size(self):
+    def getBoardSize(self):
         """
         Returns:
             (x,y): a tuple of board dimensions
         """
 
     @abstractmethod
-    def get_action_size(self):
+    def getActionSize(self):
         """
         Returns:
             actionSize: number of all possible actions
         """
 
     @abstractmethod
-    def get_action_names(self):
+    def getActionNames(self):
         """
         Returns:
-            action_names: a dictionary mapping action names to actions
+            actionNames: a dictionary mapping action names to actions
         """
 
-    def get_action_prompt(self):
+    def getActionPrompt(self):
         """
         Returns:
-            action_prompt: A message shown to ask a human player for input.
+            actionPrompt: A message shown to ask a human player for input.
         """
         return "Your move > "
 
     @abstractmethod
-    def get_next_state(self, board, player, action):
+    def getNextState(self, board, player, action):
         """
         Input:
             board: current board
@@ -63,7 +63,7 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def get_valid_moves(self, board, player):
+    def getValidMoves(self, board, player):
         """
         Input:
             board: current board
@@ -76,7 +76,7 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def get_game_ended(self, board, player):
+    def getGameEnded(self, board, player):
         """
         Input:
             board: current board
@@ -88,7 +88,7 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def get_canonical_form(self, board, player):
+    def getCanonicalForm(self, board, player):
         """
         Input:
             board: current board
@@ -104,7 +104,7 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def get_symmetries(self, board, pi):
+    def getSymmetries(self, board, pi):
         """
         Input:
             board: current board
@@ -117,7 +117,7 @@ class Game(ABC):
         """
 
     @abstractmethod
-    def string_representation(self, board):
+    def toString(self, board):
         """
         Input:
             board: current board

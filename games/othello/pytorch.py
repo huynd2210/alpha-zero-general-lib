@@ -49,15 +49,15 @@ class AverageMeter:
 
 class PyTorchNetWrapper(NeuralNet):
     def __init__(self, game):
-        self.board_x, self.board_y = game.get_board_size()
-        self.model = self.get_model(
-            game.get_board_size(), game.get_action_size(), args,
+        self.board_x, self.board_y = game.getBoardSize()
+        self.model = self.getModel(
+            game.getBoardSize(), game.getActionSize(), args,
         )
         if args.cuda:
             self.model.cuda()
 
     @staticmethod
-    def get_model(board_size, action_size, args):
+    def getModel(board_size, action_size, args):
         """
         Return compiled tensorflow.keras.models.Model.
         """
@@ -98,8 +98,8 @@ class PyTorchNetWrapper(NeuralNet):
 
                 # compute output
                 out_pi, out_v = self.model(boards)
-                l_pi = self.loss_pi(target_pis, out_pi)
-                l_v = self.loss_v(target_vs, out_v)
+                l_pi = self.lossPi(target_pis, out_pi)
+                l_v = self.lossV(target_vs, out_v)
                 total_loss = l_pi + l_v
 
                 # record loss
@@ -129,13 +129,13 @@ class PyTorchNetWrapper(NeuralNet):
 
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]
 
-    def loss_pi(self, targets, outputs):
+    def lossPi(self, targets, outputs):
         return -torch.sum(targets * outputs) / targets.size()[0]
 
-    def loss_v(self, targets, outputs):
+    def lossV(self, targets, outputs):
         return torch.sum((targets - outputs.view(-1)) ** 2) / targets.size()[0]
 
-    def save_checkpoint(
+    def saveCheckpoint(
         self, folder="checkpoint", filename="checkpoint.pth.tar"
     ):
         filepath = os.path.join(folder, filename)
@@ -148,7 +148,7 @@ class PyTorchNetWrapper(NeuralNet):
             os.mkdir(folder)
         torch.save({"state_dict": self.model.state_dict()}, filepath)
 
-    def load_checkpoint(
+    def loadCheckpoint(
         self, folder="checkpoint", filename="checkpoint.pth.tar"
     ):
         # https://github.com/pytorch/examples/blob/master/imagenet/main.py#L98
@@ -159,21 +159,21 @@ class PyTorchNetWrapper(NeuralNet):
         checkpoint = torch.load(filepath, map_location=map_location)
         self.model.load_state_dict(checkpoint["state_dict"])
 
-    def get_weights(self):
+    def getWeights(self):
         return {
             key: value.cpu() for key, value in self.model.state_dict().items()
         }
 
-    def set_weights(self, weights):
+    def setWeights(self, weights):
         self.model.load_state_dict(weights)
 
-    def request_gpu(self):
+    def requestGPU(self):
         return self.model.args.cuda
 
 
 class OthelloNNet(PyTorchNetWrapper):
     @staticmethod
-    def get_model(board_size, action_size, args):
+    def getModel(board_size, action_size, args):
         return OthelloNNetModel(board_size, action_size, args)
 
 

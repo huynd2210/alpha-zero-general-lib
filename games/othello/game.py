@@ -8,7 +8,7 @@ class OthelloGame(Game):
     square_content = {-1: "X", +0: "-", +1: "O"}
 
     @staticmethod
-    def get_square_piece(piece):
+    def getSquarePiece(piece):
         return OthelloGame.square_content[piece]
 
     def __init__(self, n):
@@ -17,26 +17,26 @@ class OthelloGame(Game):
             f"{x},{y}": x * n + y for x in range(n) for y in range(n)
         }
 
-    def get_init_board(self):
+    def getInitBoard(self):
         # return initial board (numpy board)
         b = Board(self.n)
         return np.array(b.pieces)
 
-    def get_board_size(self):
+    def getBoardSize(self):
         # (a,b) tuple
         return (self.n, self.n)
 
-    def get_action_size(self):
+    def getActionSize(self):
         # return number of actions
         return self.n * self.n + 1
 
-    def get_action_names(self):
+    def getActionNames(self):
         return self.action_names
 
-    def get_action_prompt(self):
+    def getActionPrompt(self):
         return "Your move: 'row,col' > "
 
-    def get_next_state(self, board, player, action):
+    def getNextState(self, board, player, action):
         # if player takes action on board, return next (board,player)
         # action must be a valid move
         if action == self.n * self.n:
@@ -44,15 +44,15 @@ class OthelloGame(Game):
         b = Board(self.n)
         b.pieces = np.copy(board)
         move = (int(action / self.n), action % self.n)
-        b.execute_move(move, player)
+        b.executeMove(move, player)
         return (b.pieces, -player)
 
-    def get_valid_moves(self, board, player):
+    def getValidMoves(self, board, player):
         # return a fixed size binary vector
-        valids = [0] * self.get_action_size()
+        valids = [0] * self.getActionSize()
         b = Board(self.n)
         b.pieces = np.copy(board)
-        legal_moves = b.get_legal_moves(player)
+        legal_moves = b.getLegalMoves(player)
         if len(legal_moves) == 0:
             valids[-1] = 1
             return np.array(valids)
@@ -60,24 +60,24 @@ class OthelloGame(Game):
             valids[self.n * x + y] = 1
         return np.array(valids)
 
-    def get_game_ended(self, board, player):
+    def getGameEnded(self, board, player):
         # return 0 if not ended, 1 if player 1 won, -1 if player 1 lost
         # player = 1
         b = Board(self.n)
         b.pieces = np.copy(board)
-        if b.has_legal_moves(player):
+        if b.hasLegalMoves(player):
             return 0
-        if b.has_legal_moves(-player):
+        if b.hasLegalMoves(-player):
             return 0
-        if b.count_diff(player) > 0:
+        if b.countDiff(player) > 0:
             return 1
         return -1
 
-    def get_canonical_form(self, board, player):
+    def getCanonicalForm(self, board, player):
         # return state if player==1, else return -state if player==-1
         return player * board
 
-    def get_symmetries(self, board, pi):
+    def getSymmetries(self, board, pi):
         # mirror, rotational
         assert len(pi) == self.n ** 2 + 1  # 1 for pass
         pi_board = np.reshape(pi[:-1], (self.n, self.n))
@@ -93,19 +93,19 @@ class OthelloGame(Game):
                 result += [(newB, list(newPi.ravel()) + [pi[-1]])]
         return result
 
-    def string_representation(self, board):
+    def toString(self, board):
         return board.tobytes()
 
-    def string_representation_readable(self, board):
+    def toStringReadable(self, board):
         board_s = "".join(
             self.square_content[square] for row in board for square in row
         )
         return board_s
 
-    def get_score(self, board, player):
+    def getScore(self, board, player):
         b = Board(self.n)
         b.pieces = np.copy(board)
-        return b.count_diff(player)
+        return b.countDiff(player)
 
     @staticmethod
     def display(board):

@@ -25,4 +25,4 @@ player2 = AlphaZeroPlayer(game, OthelloNNet, folder, filename)
 
 arena = Arena(player1, player2, game, display=OthelloGame.display)
 
-print(arena.play_games(10, verbose=True))
+print(arena.playGames(10, verbose=True))

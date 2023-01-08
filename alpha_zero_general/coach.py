@@ -19,8 +19,8 @@ from .arena import Arena
 from .mcts import MCTS
 from .player import AlphaZeroPlayer
 from .utils import DotDict
-from .utils import parse_game_filename
-from .utils import parse_model_filename
+from .utils import parseGameFilename
+from .utils import parseModelFilename
 
 
 @ray.remote
@@ -38,16 +38,16 @@ class SelfPlay:
 
     def start(self):
         """Start the main self play loop for this actor and close when done."""
-        while not ray.get(self.replay_buffer.played_enough.remote()):
+        while not ray.get(self.replay_buffer.playedEnough.remote()):
             weights, self.model_revision = ray.get(
-                self.shared_storage.get_weights.remote(self.model_revision)
+                self.shared_storage.getWeights.remote(self.model_revision)
             )
             if weights:
-                self.nnet.set_weights(weights)
-            examples = self.execute_episode()
-            self.replay_buffer.add_game_examples.remote(examples)
+                self.nnet.setWeights(weights)
+            examples = self.executeEpisode()
+            self.replay_buffer.addExamples.remote(examples)
 
-    def execute_episode(self):
+    def executeEpisode(self):
         """
         This function executes one episode of self-play, starting with player 1.
         As the game is played, each turn is added as a training example to
@@ -66,28 +66,28 @@ class SelfPlay:
         """  # TODO: incorrect description of return
         self.mcts = MCTS(self.game, self.nnet, self.args)
         train_examples = []
-        board = self.game.get_init_board()
+        board = self.game.getInitBoard()
         current_player = 1
         episode_step = 0
 
         while True:
             episode_step += 1
-            canonical_board = self.game.get_canonical_form(
+            canonical_board = self.game.getCanonicalForm(
                 board, current_player
             )
             temp = int(episode_step < self.args.tempThreshold)
 
-            pi = self.mcts.get_action_prob(canonical_board, temp=temp)
-            sym = self.game.get_symmetries(canonical_board, pi)
+            pi = self.mcts.getActionProb(canonical_board, temp=temp)
+            sym = self.game.getSymmetries(canonical_board, pi)
             for b, p in sym:
                 train_examples.append([b, current_player, p, None])
 
             action = np.random.choice(len(pi), p=pi)
-            board, current_player = self.game.get_next_state(
+            board, current_player = self.game.getNextState(
                 board, current_player, action
             )
 
-            r = self.game.get_game_ended(board, current_player)
+            r = self.game.getGameEnded(board, current_player)
 
             if r != 0:
                 return [
@@ -110,7 +110,7 @@ class SharedStorage:
         }
         print(f"Initialized with weights at revision {self.revision}.")
 
-    def get_weights(self, revision=0):
+    def getWeights(self, revision=0):
         """
         Return the weights and the current revision, if the given revision
         is older than the current one. Otherwise return None-type weights.
@@ -120,29 +120,29 @@ class SharedStorage:
         else:
             return None, self.revision
 
-    def get_revision(self):
+    def getRevision(self):
         """Return the current revision of the model weights."""
         return self.revision
 
-    def set_weights(self, weights, policy_loss=None, value_loss=None):
+    def setWeights(self, weights, policy_loss=None, value_loss=None):
         """Set the next revision of the model weights."""
         self.weights = weights
         if policy_loss:
-            self.set_info("policy_loss", policy_loss)
+            self.setInfo("policy_loss", policy_loss)
         if value_loss:
-            self.set_info("value_loss", value_loss)
+            self.setInfo("value_loss", value_loss)
         self.revision += 1
         return self.revision
 
-    def get_infos(self):
+    def getInfos(self):
         """Returns the stored information dictionary."""
         return self.infos
 
-    def set_info(self, key, value):
+    def setInfo(self, key, value):
         """Set or update a value in the information dictionary."""
         self.infos[key] = value
 
-    def trained_enough(self):
+    def trainedEnough(self):
         """Returns true if the last iteration of training is done."""
         return self.infos["trained_enough"]
 
@@ -158,21 +158,21 @@ class ReplayBuffer:
         self.games_played = 0
         self.folder = folder
 
-    def get_examples(self):
+    def getExamples(self):
         """Returns a list of (ray object ids of) examples from the history of played games."""
         return list(self.history)
 
-    def add_game_examples(self, examples):
+    def addExamples(self, examples):
         """Add examples of a recent game."""
         self.history.append(ray.put(examples))
         self.games_played += 1
         self.save(examples, self.games_played)
 
-    def get_number_of_games_played(self):
+    def getNumberGamesPlayed(self):
         """Return the number of games played."""
         return self.games_played
 
-    def played_enough(self):
+    def playedEnough(self):
         """Returns true if all the number of requested games has been played."""
         return self.games_played >= self.games_to_play
 
@@ -183,7 +183,7 @@ class ReplayBuffer:
         filenames = sorted(glob.glob(os.path.join(self.folder, "game_*")))
         self.games_played = 0
         if filenames:
-            self.games_played = parse_game_filename(
+            self.games_played = parseGameFilename(
                 os.path.basename(filenames[-1])
             )
         for filename in filenames[-self.games_to_use :]:
@@ -244,20 +244,20 @@ class ModelTrainer:
         # get initial weights
         self.nnet = self.nnet_class(self.game)
         weights, self.model_revision = ray.get(
-            self.shared_storage.get_weights.remote(self.model_revision)
+            self.shared_storage.getWeights.remote(self.model_revision)
         )
-        self.nnet.set_weights(weights)
+        self.nnet.setWeights(weights)
 
     def start(self):
         """Start the main training loop and close when done."""
         # train loop, we train as long as we play
-        while not ray.get(self.replay_buffer.played_enough.remote()):
+        while not ray.get(self.replay_buffer.playedEnough.remote()):
 
             # wait with training according to selfplay / training ratio
             games_played, model_revision = ray.get(
                 [
-                    self.replay_buffer.get_number_of_games_played.remote(),
-                    self.shared_storage.get_revision.remote(),
+                    self.replay_buffer.getNumberGamesPlayed.remote(),
+                    self.shared_storage.getRevision.remote(),
                 ]
             )
             if (
@@ -270,49 +270,49 @@ class ModelTrainer:
             self.train()
 
         # close
-        ray.get(self.shared_storage.set_info.remote("trained_enough", True))
+        ray.get(self.shared_storage.setInfo.remote("trained_enough", True))
 
     def train(self):
         """Trains the model one more iteration."""
-        old_weights = self.nnet.get_weights()
-        game_object_ids = ray.get(self.replay_buffer.get_examples.remote())
+        old_weights = self.nnet.getWeights()
+        game_object_ids = ray.get(self.replay_buffer.getExamples.remote())
         games = ray.get(game_object_ids)
         train_examples = [example for game in games for example in game]
         shuffle(train_examples)
         policy_loss, value_loss = self.nnet.train(train_examples)
-        weights = self.nnet.get_weights()
+        weights = self.nnet.getWeights()
 
-        if self.pit_against_old_model and not self.wins_against_old_model(
+        if self.pit_against_old_model and not self.winsAgainstOldModel(
             old_weights
         ):
             # reject the model
-            self.nnet.set_weights(old_weights)
+            self.nnet.setWeights(old_weights)
             return
         else:
             self.model_revision = ray.get(
-                self.shared_storage.set_weights.remote(
+                self.shared_storage.setWeights.remote(
                     weights, policy_loss, value_loss
                 )
             )
             if self.model_revision >= self.save_model_from_revision_n_on:
-                self.nnet.save_checkpoint(
+                self.nnet.saveCheckpoint(
                     folder=self.args.checkpoint,
                     filename=f"model_{self.model_revision:05d}",
                 )
 
-    def wins_against_old_model(self, old_weights):
+    def winsAgainstOldModel(self, old_weights):
         """Returns True if the current model won pitting against the last one."""
         # TODO: Like training, this should be done on GPU if possible.
         print("PITTING AGAINST PREVIOUS VERSION")
         old_net = self.nnet_class(self.game)
-        old_net.set_weights(old_weights)
+        old_net.setWeights(old_weights)
         kwargs = dict(
             num_mcts_sims=self.args.numMCTSSims, cpuct=self.args.cpuct
         )
         prev_model_player = AlphaZeroPlayer(self.game, old_net, **kwargs)
         new_model_player = AlphaZeroPlayer(self.game, self.nnet, **kwargs)
         arena = Arena(prev_model_player, new_model_player, self.game)
-        pwins, nwins, draws = arena.play_games(self.args.arenaCompare)
+        pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
         print("NEW/PREV WINS : %d / %d ; DRAWS : %d" % (nwins, pwins, draws))
         if (
             pwins + nwins == 0
@@ -346,7 +346,7 @@ class Coach:
         self.nnet_class = nnet.__class__
         self.args = args
         self.pit_against_old_model = pit_against_old_model
-        self.request_gpu = self.nnet.request_gpu()
+        self.request_gpu = self.nnet.requestGPU()
 
     def learn(self):
         """Start the learning algorithm."""
@@ -360,8 +360,8 @@ class Coach:
             print(
                 f"Loading initial model from checkpoint {self.args.load_folder_file}..."
             )
-            revision = parse_model_filename(self.args.load_folder_file[1])
-            self.nnet.load_checkpoint(
+            revision = parseModelFilename(self.args.load_folder_file[1])
+            self.nnet.loadCheckpoint(
                 folder=self.args.load_folder_file[0],
                 filename=self.args.load_folder_file[1],
             )
@@ -370,7 +370,7 @@ class Coach:
         ray.init(ignore_reinit_error=True)
 
         shared_storage = SharedStorage.remote(
-            self.nnet.get_weights(), revision=revision
+            self.nnet.getWeights(), revision=revision
         )
         del self.nnet
 
@@ -416,16 +416,16 @@ class Coach:
         while not all(
             ray.get(
                 [
-                    replay_buffer.played_enough.remote(),
-                    shared_storage.trained_enough.remote(),
+                    replay_buffer.playedEnough.remote(),
+                    shared_storage.trainedEnough.remote(),
                 ]
             )
         ):
             games_played, revision, infos = ray.get(
                 [
-                    replay_buffer.get_number_of_games_played.remote(),
-                    shared_storage.get_revision.remote(),
-                    shared_storage.get_infos.remote(),
+                    replay_buffer.getNumberGamesPlayed.remote(),
+                    shared_storage.getRevision.remote(),
+                    shared_storage.getInfos.remote(),
                 ]
             )
             t.set_postfix(

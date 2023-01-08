@@ -35,10 +35,10 @@ class RandomPlayer(Player):
 
     def play(self, board):
         """Returns the action of the player for the given board."""
-        action = np.random.randint(self.game.get_action_size())
-        valids = self.game.get_valid_moves(board, 1)
+        action = np.random.randint(self.game.getActionSize())
+        valids = self.game.getValidMoves(board, 1)
         while valids[action] != 1:
-            action = np.random.randint(self.game.get_action_size())
+            action = np.random.randint(self.game.getActionSize())
         return action
 
 
@@ -47,10 +47,10 @@ class HumanPlayer(Player):
 
     def play(self, board):
         """Returns the action of the player for the given board."""
-        action_names = self.game.get_action_names()
-        valids = self.game.get_valid_moves(board, 1)
+        action_names = self.game.getActionNames()
+        valids = self.game.getValidMoves(board, 1)
         while True:
-            input_action = input(self.game.get_action_prompt())
+            input_action = input(self.game.getActionPrompt())
             if input_action not in action_names:
                 print("Unknown action.")
                 continue
@@ -71,13 +71,13 @@ class GreedyPlayer(Player):
 
     def play(self, board):
         """Returns the action of the player for the given board."""
-        valids = self.game.get_valid_moves(board, 1)
+        valids = self.game.getValidMoves(board, 1)
         candidates = []
-        for a in range(self.game.get_action_size()):
+        for a in range(self.game.getActionSize()):
             if valids[a] == 0:
                 continue
-            next_board, _ = self.game.get_next_state(board, 1, a)
-            score = self.game.get_score(next_board, 1)
+            next_board, _ = self.game.getNextState(board, 1, a)
+            score = self.game.getScore(next_board, 1)
             candidates += [(-score, a)]
         candidates.sort()
         return candidates[0][1]
@@ -97,7 +97,7 @@ class NeuralNetPlayer(Player):
         elif nnet and isinstance(nnet, type) and issubclass(nnet, NeuralNet):
             self.net = nnet(game)
             if folder and filename:
-                self.net.load_checkpoint(folder, filename)
+                self.net.loadCheckpoint(folder, filename)
         else:
             raise TypeError(
                 "Either provide a NeuralNet subclass "
@@ -113,7 +113,7 @@ class BareModelPlayer(NeuralNetPlayer):
 
     def play(self, board):
         """Returns the action of the player for the given board."""
-        valids = self.game.get_valid_moves(board, 1)
+        valids = self.game.getValidMoves(board, 1)
         pi, _ = self.net.predict(board)
         return np.argmax(pi * valids)
 
@@ -133,7 +133,7 @@ class AlphaZeroPlayer(NeuralNetPlayer):
 
     def play(self, board):
         """Returns the action of the player for the given board."""
-        return np.argmax(self.mcts.get_action_prob(board, temp=0))
+        return np.argmax(self.mcts.getActionProb(board, temp=0))
 
     def reset(self):
         """Resets the players experience in/view of the current game."""

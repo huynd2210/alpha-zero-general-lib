@@ -14,7 +14,7 @@ MODEL_FILENAME_PATTERN = re.compile(r"model_(\d+)(_.*)?(\..*)?")
 GAME_FILENAME_PATTERN = re.compile(r"game_(\d+)(_.*)?(\..*)?")
 
 
-def parse_model_filename(filename):
+def parseModelFilename(filename):
     """Returns the model revision for a model filename like 'model_00001'
     or 'model_1234.file' or 'model_0123_keep'."""
     match = re.match(MODEL_FILENAME_PATTERN, filename)
@@ -25,7 +25,7 @@ def parse_model_filename(filename):
     )
 
 
-def parse_game_filename(filename):
+def parseGameFilename(filename):
     """Returns the running game number for a game filename like 'game_00001'
     or 'game_1234.file' or 'game_0123_keep'."""
     match = re.match(GAME_FILENAME_PATTERN, filename)
