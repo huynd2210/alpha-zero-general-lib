@@ -6,10 +6,10 @@ from alpha_zero_general import GreedyPlayer
 from alpha_zero_general import League
 from alpha_zero_general import RandomPlayer
 
-from .game import OthelloGame
-from .pytorch import OthelloNNet
+from .game import TicTacToeGame
+from .pytorch import TicTacToeNNet
 
-game = OthelloGame(6)
+game = TicTacToeGame(6)
 
 folder, filename = "./runs/1", "model_00100"
 random = RandomPlayer(game)
@@ -26,7 +26,7 @@ league.addPlayer("greedy", greedy)
 
 
 def alphaZeroAtCheckpoint(i):
-    return AlphaZeroPlayer(game, OthelloNNet, "./runs/1", f"model_{i:05d}")
+    return AlphaZeroPlayer(game, TicTacToeNNet, "./runs/1", f"model_{i:05d}")
 
 
 for i in [10, 20, 50, 100, 150, 200]:
