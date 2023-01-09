@@ -9,8 +9,8 @@ from alpha_zero_general.coach import ReplayBuffer
 from alpha_zero_general.coach import SelfPlay
 from alpha_zero_general.coach import SharedStorage
 
-from games.othello.game import OthelloGame
-from games.othello.keras import OthelloNNet
+from ..game import OthelloGame
+from ..keras import OthelloNNet
 
 args = DotDict(
     {
