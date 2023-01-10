@@ -1,0 +1,21 @@
+dist: bionic
+language: python
+python:
+  - "3.7"
+  - "3.8"
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+cache: pip
+before_install:
+  - pip install --upgrade pip wheel
+  - pip install poetry==1.0.5
+install:
+  - poetry install -vvv
+before_script:
+  - pip install tensorflow==2.*
+  - rm -rf /tmp/alpha_zero_general/
+script:
+  - pytest tests --cov src/ --cov-report=xml\:coverage.xml --cov-report term-missing -vvv
+after_script: cd ~
+after_success:
+  - bash <(curl -s https://codecov.io/bash) || echo "Codecov did not collect coverage reports"
